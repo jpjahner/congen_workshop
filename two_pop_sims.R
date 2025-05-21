@@ -5,8 +5,19 @@
 ## Contact: Josh Jahner, jpjahner@gmail.com
 ## 19 v 25
 
+## The goal of this section is to use your population genetic simulations
+## to carry out two population genetic analyses. First, you will conduct
+## a principal components analysis (PCA) to see if there is genetic
+## structure between two simulated populations. In the PCA plot, if 
+## populations are strongly divided on the left and right hand sides, that
+## is evidence for strong genetic structure. Try out a few different
+## combinations of beta distribution shapes and numbers of loci in your
+## simulations. Which combinations do and do not have strong genetic
+## structure for the PCA?
 
-## Plot beta distributions for the two populations
+
+
+## Plot beta distributions for two populations
 
 xvals <- seq(0, 1, by=0.01)
 par(mar=c(5,5,1,1))
@@ -37,7 +48,7 @@ single_pop_sim <- function(nloci=NA, ninds=NA, alpha=NA, beta=NA){
 
 ## Generate genotype matrix for both populations
 
-ninds_per_pop <- 20
+ninds_per_pop <- 20 ## NOTE: please keep this number even, or the parentage sims below will break
 nloci_per_pop <- 500
 pop1_genos <- single_pop_sim(nloci=nloci_per_pop, ninds=ninds_per_pop, alpha=0.5, beta=0.05)
 pop2_genos <- single_pop_sim(nloci=nloci_per_pop, ninds=ninds_per_pop, alpha=0.05, beta=0.5)
@@ -63,7 +74,23 @@ points(all_pca$x[(ninds_per_pop+1):(ninds_per_pop*2),1], all_pca$x[(ninds_per_po
 
 
 
-## cross individuals from population 1 to create a second generation
+## Next, you will take one population and cross the individuals to create
+## a second offspring generation to assess your ability to recover parent
+## offspring relationships. Again, try out a few combinations of beta
+## distribution shapes and numbers of loci. For which combinations are 
+## you able to recover accurate parent offspring relationships?
+
+
+## create parent population genotypes
+
+pedigree_ninds_per_pop <- 20 ## NOTE: please keep this number even, or the parentage sims will break
+pedigree_nloci_per_pop <- 500
+parent_genos <- single_pop_sim(nloci=pedigree_nloci_per_pop, ninds=pedigree_ninds_per_pop, alpha=0.5, beta=0.05)
+
+
+
+## cross individuals from population 1 from above to create a second generation
+	## when pop size is 20:
 	## ind1 crossed with ind11
 	## ind2 crossed with ind12
 	## ind3 crossed with ind13
@@ -75,18 +102,18 @@ points(all_pca$x[(ninds_per_pop+1):(ninds_per_pop*2),1], all_pca$x[(ninds_per_po
 	## ind9 crossed with ind19
 	## ind10 crossed with ind20
 
-offspring_genos <- matrix(NA, (ninds_per_pop/2), nloci_per_pop)
-for (i in 1:(ninds_per_pop/2)){
-	for (j in 1:nloci_per_pop){
-		if		(pop1_genos[i,j]==0 && pop1_genos[i+10,j]==0) { offspring_genos[i,j] <- 0 }							## possible genotypes = 0
-		else if	(pop1_genos[i,j]==0 && pop1_genos[i+10,j]==1) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) }			## possible genotypes = 0,1
-		else if	(pop1_genos[i,j]==0 && pop1_genos[i+10,j]==2) { offspring_genos[i,j] <- 1 }							## possible genotypes = 1
-		else if	(pop1_genos[i,j]==1 && pop1_genos[i+10,j]==0) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) }			## possible genotypes = 0,1
-		else if	(pop1_genos[i,j]==1 && pop1_genos[i+10,j]==1) { offspring_genos[i,j] <- sum(rbinom(2, 1, 0.5)) }		## possible genotypes = 0,1,2
-		else if	(pop1_genos[i,j]==1 && pop1_genos[i+10,j]==2) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) + 1 }		## possible genotypes = 1,2
-		else if	(pop1_genos[i,j]==2 && pop1_genos[i+10,j]==0) { offspring_genos[i,j] <- 1 }							## possible genotypes = 1
-		else if	(pop1_genos[i,j]==2 && pop1_genos[i+10,j]==1) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) + 1 }		## possible genotypes = 1,2
-		else if	(pop1_genos[i,j]==2 && pop1_genos[i+10,j]==2) { offspring_genos[i,j] <- 2 }							## possible genotypes = 2
+offspring_genos <- matrix(NA, (pedigree_ninds_per_pop/2), pedigree_nloci_per_pop)
+for (i in 1:(pedigree_ninds_per_pop/2)){
+	for (j in 1:pedigree_nloci_per_pop){
+		if		(parent_genos[i,j]==0 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==0) { offspring_genos[i,j] <- 0 }							## possible genotypes = 0
+		else if	(parent_genos[i,j]==0 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==1) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) }			## possible genotypes = 0,1
+		else if	(parent_genos[i,j]==0 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==2) { offspring_genos[i,j] <- 1 }							## possible genotypes = 1
+		else if	(parent_genos[i,j]==1 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==0) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) }			## possible genotypes = 0,1
+		else if	(parent_genos[i,j]==1 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==1) { offspring_genos[i,j] <- sum(rbinom(2, 1, 0.5)) }	## possible genotypes = 0,1,2
+		else if	(parent_genos[i,j]==1 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==2) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) + 1 }		## possible genotypes = 1,2
+		else if	(parent_genos[i,j]==2 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==0) { offspring_genos[i,j] <- 1 }							## possible genotypes = 1
+		else if	(parent_genos[i,j]==2 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==1) { offspring_genos[i,j] <- rbinom(1, 1, 0.5) + 1 }		## possible genotypes = 1,2
+		else if	(parent_genos[i,j]==2 && parent_genos[i+(pedigree_ninds_per_pop/2),j]==2) { offspring_genos[i,j] <- 2 }							## possible genotypes = 2
 	}
 }
 
@@ -96,16 +123,16 @@ for (i in 1:(ninds_per_pop/2)){
 library(sequoia)
 
 ## sequoia requires row names with individual ids, so let's make those here
-pop1_names <- vector()
-for (i in 1:ninds_per_pop) { pop1_names[i] <- paste0("pop1_", i) }
+parent_names <- vector()
+for (i in 1:pedigree_ninds_per_pop) { parent_names[i] <- paste0("parent_", i) }
 offspring_names <- vector()
-for (i in 1:(ninds_per_pop/2)) { offspring_names[i] <- paste0("offspring_", i) }
+for (i in 1:(pedigree_ninds_per_pop/2)) { offspring_names[i] <- paste0("offspring_", i) }
 
 ## merge the pop1 and offspring genotype matrices, add the individual ids, and run sequoia
-pedigree_genos <- rbind(pop1_genos, offspring_genos)
-rownames(pedigree_genos) <- c(pop1_names, offspring_names)
-GetMaybeRel(pedigree_genos)
-
+pedigree_genos <- rbind(parent_genos, offspring_genos)
+rownames(pedigree_genos) <- c(parent_names, offspring_names)
+pedigree_out <- GetMaybeRel(pedigree_genos)
+	pedigree_out$MaybeTrio
 
 
 
