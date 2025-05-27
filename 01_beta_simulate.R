@@ -11,7 +11,7 @@
 	## https://github.com/BlakeRMills/MetBrewer
 install.packages("MetBrewer")
 library(MetBrewer)
-plot_colors <- met.brewer("Johnson", 5) ## choosing 5 colors from the Isfahan2 palette
+plot_colors <- met.brewer("Johnson", 5) ## choosing 5 colors from the Johnson palette
 
 
 
