@@ -6,6 +6,6 @@ Contact: Josh Jahner, jpjahner@gmail.com
 
 ## Repository contents
 
-* single_pop_sims.R
+* 01_beta_simulate.R - learn about using the beta distribution to simulate genetic data
 
-* 
+* 02_explore_analyses.R - explore a few genetic analyses (genetic diversity, population structure, parent-offspring reconstruction) using simulated data

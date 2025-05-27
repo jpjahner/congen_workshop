@@ -1,29 +1,25 @@
 ###########################################
-## two_pop_sims.R
+## explore_analyses.R
 ###########################################
 
 ## Contact: Josh Jahner, jpjahner@gmail.com
 ## 19 v 25
 
 ## The goal of this section is to use your population genetic simulations
-## to carry out two population genetic analyses. First, you will conduct
-## a principal components analysis (PCA) to see if there is genetic
-## structure between two simulated populations. In the PCA plot, if 
-## populations are strongly divided on the left and right hand sides, that
-## is evidence for strong genetic structure. Try out a few different
-## combinations of beta distribution shapes and numbers of loci in your
-## simulations. Which combinations do and do not have strong genetic
-## structure for the PCA?
+## to carry out a few conservation genetic analyses. First, you will
+## calculate a commonly used measure of genetic diversity (expected
+## heterozygosity) for datasets created under different site frequency
+## spectra.
 
 
 
-## Plot beta distributions for two populations
+## Plot beta distributions for two populations (try out different beta shape values)
 
 xvals <- seq(0, 1, by=0.01)
 par(mar=c(5,5,1,1))
 plot(0, type="n", xlim=c(0,1), ylim=c(0,5), xlab="Allele frequency", ylab="Beta density", cex.lab=1.5, las=1)
-points(xvals, dbeta(xvals, shape1=0.5, shape2=0.05), type="l", col="blue", lwd=2)
-points(xvals, dbeta(xvals, shape1=0.05, shape2=0.5), type="l", col="red", lwd=2)
+points(xvals, dbeta(xvals, shape1=0.8, shape2=0.45), type="l", col="blue", lwd=6)
+points(xvals, dbeta(xvals, shape1=0.05, shape2=0.5), type="l", col="red", lwd=6)
 
 
 
@@ -48,18 +44,46 @@ single_pop_sim <- function(nloci=NA, ninds=NA, alpha=NA, beta=NA){
 
 ## Generate genotype matrix for both populations
 
-ninds_per_pop <- 20 ## NOTE: please keep this number even, or the parentage sims below will break
+ninds_per_pop <- 20 
 nloci_per_pop <- 500
-pop1_genos <- single_pop_sim(nloci=nloci_per_pop, ninds=ninds_per_pop, alpha=0.5, beta=0.05)
+pop1_genos <- single_pop_sim(nloci=nloci_per_pop, ninds=ninds_per_pop, alpha=0.8, beta=0.45)
 pop2_genos <- single_pop_sim(nloci=nloci_per_pop, ninds=ninds_per_pop, alpha=0.05, beta=0.5)
 
 
 
-## principal component analysis (PCA) to look at population structure
+## Calculating genetic diversity (expected heterozygosity)
 
-all_genos <- rbind(pop1_genos, pop2_genos)
+calc_he <- function(input_matrix=NA){
+	he_vect <- vector(length=dim(input_matrix)[2])
+	for (i in 1:dim(input_matrix)[2]){
+		afreq <- mean(input_matrix[,i]) / 2		## calculate the locus allele frequency
+		he_vect[i] <- 2 * afreq * (1-afreq)		## calculate expected heterozygosity from the allele frequency
+	}
+	## print out mean value
+	print(paste0("Mean He: ", mean(he_vect)))
+}
+
+calc_he(pop1_genos)
+calc_he(pop2_genos)
+
+
+
+
+## Next, you will conduct an analysis used to assess the presence of
+## genetic structure (principal components analysis; PCA) between two
+## simulated populations. In the PCA plot, if populations are strongly
+## divided on the left and right hand sides, that is evidence for strong
+## genetic structure. Try out a few different combinations of beta
+## distribution shapes and numbers of loci in your simulations. Which
+## combinations do and do not have strong genetic structure for the PCA?
+
+
+## merge the genotypic data from both populations into one matrix
+all_genos <- rbind(pop1_genos, pop2_genos)  
+## run the PCA
 all_pca <- prcomp(all_genos, center=TRUE, scale=FALSE)
 	summary(all_pca)
+	## NOTE: the proportion of variance explained by PC1 indicates the strength of genetic structure
 
 
 
@@ -119,7 +143,7 @@ for (i in 1:(pedigree_ninds_per_pop/2)){
 
 
 ## parent offspring relationships with the sequoia package
-#install.packages("sequoia")
+install.packages("sequoia")
 library(sequoia)
 
 ## sequoia requires row names with individual ids, so let's make those here
@@ -132,7 +156,7 @@ for (i in 1:(pedigree_ninds_per_pop/2)) { offspring_names[i] <- paste0("offsprin
 pedigree_genos <- rbind(parent_genos, offspring_genos)
 rownames(pedigree_genos) <- c(parent_names, offspring_names)
 pedigree_out <- GetMaybeRel(pedigree_genos)
-	pedigree_out$MaybeTrio
-
+	pedigree_out$MaybeTrio[,1:3]
+	## do the inferred parent offspring relationships match up?
 
 
