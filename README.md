@@ -9,3 +9,5 @@ Contact: Josh Jahner, jpjahner@gmail.com
 * 01_beta_simulate.R - learn about using the beta distribution to simulate genetic data
 
 * 02_explore_analyses.R - explore a few genetic analyses (genetic diversity, population structure, parent-offspring reconstruction) using simulated data
+
+* congen_slides.pdf - the powerpoint slides from the workshop
